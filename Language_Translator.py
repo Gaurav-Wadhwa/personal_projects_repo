@@ -23,10 +23,10 @@ except Exception as e:
 # Function to Convert Speech to Text
 def speech_to_text():
     recognizer = sr.Recognizer()
-    with sr.Microphone() as source:
-        st.info("🎤 Speak now...")
+    with sr.AudioFile("sample.wav") as source:  # Using an audio file instead of Microphone
+        st.info("🎤 Processing Audio...")
         try:
-            audio = recognizer.listen(source, timeout=5)
+            audio = recognizer.record(source)
             text = recognizer.recognize_google(audio)
             return text
         except sr.UnknownValueError:
@@ -41,14 +41,9 @@ def text_to_speech(text, lang):
         temp_audio_path = temp_audio.name
         tts.save(temp_audio_path)
         st.audio(temp_audio_path, format="audio/mp3")
-# Speech Input Button
-spoken_text = ""
-if st.button("🎤 Speak"):
-    spoken_text = speech_to_text()
-    st.text_area("Converted Text:", spoken_text, height=100)
 # Manual Text Input
 st.subheader("📝 Enter Text to Translate")
-text_to_translate = st.text_area("Enter text:", spoken_text, height=100)
+text_to_translate = st.text_area("Enter text:", "", height=100)
 # Language Selection Dropdowns
 source_lang_name = st.selectbox("🔄 Source Language", ["Auto Detect"] + language_names)
 target_lang_name = st.selectbox("🎯 Target Language", language_names, index=default_lang_index)
@@ -67,4 +62,5 @@ if st.button("Translate", type="primary"):
         except Exception as e:
             st.error(f"Translation failed: {e}")
     else:
-        st.warning("⚠️ Please enter text or use speech input.")
+        st.warning("⚠️ Please enter text.")
+
