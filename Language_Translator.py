@@ -7,7 +7,7 @@ ssl._create_default_https_context = ssl._create_unverified_context
 translator = Translator()
 # Streamlit App Setup
 st.set_page_config(page_title="Language Translator", page_icon="🌎")
-st.markdown("## 🌎 Language Translator")
+st.markdown("### 🌎 Language Translator")
 # 📝 Manual Text Input
 text_to_translate = st.text_area("Enter Text to Translate", height=100)
 # 🔄 Language Selection
