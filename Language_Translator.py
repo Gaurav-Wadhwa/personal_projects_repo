@@ -10,7 +10,7 @@ st.write("### 🌎 Language Translator")
 
 def speech_to_text():
     recognizer = sr.Recognizer()
-    with sr.Microphone as source:
+    with sr.Microphone() as source:
         st.info("Listening--- Speak now")
         try:
             audio = recognizer.listen(source, timeout = 5)
