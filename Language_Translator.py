@@ -3,6 +3,9 @@ from deep_translator import GoogleTranslator
 import speech_recognition as sr
 from gtts import gTTS
 import os
+import ssl
+# Fix SSL certificate issue
+ssl._create_default_https_context = ssl._create_unverified_context
 st.set_page_config(page_title="Language Translator", page_icon="🌎")
 st.title("🌎 Language Translator")
 # Function to convert speech to text
@@ -24,24 +27,29 @@ def text_to_speech(text, lang):
     filename = "output.mp3"
     tts.save(filename)
     st.audio(filename, format="audio/mp3")  # Play audio in Streamlit
-# Get supported language codes and map them to names
-language_codes = GoogleTranslator().get_supported_languages(as_dict=True)
-language_names = list(language_codes.keys())
-# UI for speech input
+# Load supported languages
+try:
+    language_codes = GoogleTranslator().get_supported_languages(as_dict=True)
+    language_names = list(language_codes.keys())
+except Exception as e:
+    st.error(f"Error loading languages: {e}")
+    language_names = ["English", "Hindi", "French", "Spanish"]  # Fallback languages
+    language_codes = {"English": "en", "Hindi": "hi", "French": "fr", "Spanish": "es"}
+# Speech input button
 if st.button("🎤 Speak"):
     spoken_text = speech_to_text()
     st.text_area("Converted Text:", spoken_text, height=100)
 else:
     spoken_text = ""
-# UI for manual text input
+# Manual text input
 st.subheader("📝 Enter Text to Translate")
 text_to_translate = st.text_area("Enter text:", spoken_text, height=100)
 # Dropdowns for language selection
 source_lang_name = st.selectbox("🔄 Source Language", ["Auto Detect"] + language_names)
 target_lang_name = st.selectbox("🎯 Target Language", language_names, index=language_names.index("English"))
-# Convert selected language names to codes
-source_lang = "auto" if source_lang_name == "Auto Detect" else language_codes[source_lang_name]
-target_lang = language_codes[target_lang_name]
+# Convert selected language names to language codes
+source_lang = "auto" if source_lang_name == "Auto Detect" else language_codes.get(source_lang_name, "en")
+target_lang = language_codes.get(target_lang_name, "en")
 # Translation button
 if st.button("Translate", type="primary"):
     if text_to_translate.strip():
