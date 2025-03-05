@@ -1,37 +1,35 @@
 import streamlit as st
-from deep_translator import GoogleTranslator
+from googletrans import Translator, LANGUAGES
 import ssl
 # Fix SSL issues
 ssl._create_default_https_context = ssl._create_unverified_context
+# Initialize Translator
+translator = Translator()
 # Streamlit App Setup
 st.set_page_config(page_title="Language Translator", page_icon="🌎")
-st.title("🌎 Language Translator")
-# Load Supported Languages
-try:
-    language_codes = GoogleTranslator().get_supported_languages(as_dict=True)
-    language_names = list(language_codes.keys())
-    default_lang_index = language_names.index("English") if "English" in language_names else 0
-except Exception as e:
-    st.error(f"Error loading languages: {e}")
-    language_names = ["English", "Hindi", "French", "Spanish"]
-    language_codes = {"English": "en", "Hindi": "hi", "French": "fr", "Spanish": "es"}
-    default_lang_index = 0
+st.title("🌎 Language Translator & Transliteration")
 # 📝 Manual Text Input
 text_to_translate = st.text_area("Enter Text to Translate", height=100)
-# 🔄 Language Selection Dropdowns
+# 🔄 Language Selection
+language_names = list(LANGUAGES.values())  # Get language names
+language_codes = {v: k for k, v in LANGUAGES.items()}  # Map names to codes
 source_lang_name = st.selectbox("🔄 Source Language", ["Auto Detect"] + language_names)
-target_lang_name = st.selectbox("🎯 Target Language", language_names, index=default_lang_index)
+target_lang_name = st.selectbox("🎯 Target Language", language_names, index=language_names.index("english"))
 # Convert Language Names to Codes
-source_lang = "auto" if source_lang_name == "Auto Detect" else language_codes.get(source_lang_name, "en")
-target_lang = language_codes.get(target_lang_name, "en")
-# 🔁 Translation Button
+source_lang = "auto" if source_lang_name == "Auto Detect" else language_codes[source_lang_name]
+target_lang = language_codes[target_lang_name]
+# 🔁 Translation & Transliteration
 if st.button("Translate", type="primary"):
     if text_to_translate.strip():
         try:
-            # ✅ Fix for transliteration: Always use `auto` detection
-            translated_text = GoogleTranslator(source="auto", target=target_lang).translate(text_to_translate)
+            # ✅ Perfect Translation & Transliteration
+            translated = translator.translate(text_to_translate, src=source_lang, dest=target_lang)
             st.success("✅ Translation:")
-            st.write(translated_text)
+            st.write(translated.text)  # Proper translation
+            
+            # Transliteration (if available)
+            if translated.pronunciation:
+                st.info(f"🔠 Transliteration: {translated.pronunciation}")
         except Exception as e:
             st.error(f"Translation failed: {e}")
     else:
