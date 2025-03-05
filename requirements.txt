@@ -1,7 +1,7 @@
 streamlit
 deep-translator
 speechrecognition
-pyaudio
+sounddevice
+numpy
 pydub
 gtts
-ffmpeg
