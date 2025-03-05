@@ -9,7 +9,7 @@ st.set_page_config(page_icon = "🌎")
 st.write("### 🌎 Language Translator")
 
 def speech_to_text():
-    recognizer = sr.recognizer()
+    recognizer = sr.Recognizer()
     with sr.Microphone as source:
         st.info("Listening--- Speak now")
         try:
