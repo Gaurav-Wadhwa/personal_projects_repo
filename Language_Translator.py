@@ -1,52 +1,59 @@
 import streamlit as st
 from deep_translator import GoogleTranslator
 import speech_recognition as sr
+from pydub import AudioSegment
 from gtts import gTTS
 import os
-st.set_page_config(page_icon="🌎")
-st.write("### 🌎 Language Translator")
-def speech_to_text():
+st.set_page_config(page_title="Language Translator", page_icon="🌎")
+st.title("🌎 Language Translator")
+# Function to convert speech to text from an uploaded file
+def speech_to_text(audio_file):
     recognizer = sr.Recognizer()
+    
+    # Convert audio file to WAV format
+    audio = AudioSegment.from_file(audio_file)
+    converted_file = "converted.wav"
+    audio.export(converted_file, format="wav")
+    
+    with sr.AudioFile(converted_file) as source:
+        st.info("🎙️ Processing Audio...")
+        audio_data = recognizer.record(source)
+    
     try:
-        with sr.Microphone() as source:
-            st.info("🎤 Listening... Speak now")
-            recognizer.adjust_for_ambient_noise(source)  # Helps with background noise
-            audio = recognizer.listen(source, timeout=5)
-            
-            text = recognizer.recognize_google(audio)
-            return text
+        text = recognizer.recognize_google(audio_data)
+        return text
     except sr.UnknownValueError:
-        return "Could not understand audio"
+        return "❌ Could not understand the audio."
     except sr.RequestError:
-        return "Speech Recognition API error"
-    except OSError:
-        return "Microphone not available (if running on a server, try file upload instead)"
+        return "❌ Speech Recognition API error."
+# Function to convert text to speech
 def text_to_speech(text, lang):
     tts = gTTS(text=text, lang=lang, slow=False)
     filename = "output.mp3"
     tts.save(filename)
     
-    # Play the audio file
-    if os.name == "nt":  # Windows
-        os.system(f"start {filename}")
-    else:  # macOS/Linux
-        os.system(f"mpg321 {filename} &")
-# Initialize spoken_text to avoid errors
+    st.audio(filename, format="audio/mp3")  # Play audio in Streamlit
+# UI for uploading an audio file
+st.subheader("🎤 Upload an Audio File (WAV, MP3, OGG)")
+uploaded_file = st.file_uploader("Choose an audio file", type=["wav", "mp3", "ogg"])
 spoken_text = ""
-if st.button("🎤 Speak"):
-    spoken_text = speech_to_text()
+if uploaded_file is not None:
+    spoken_text = speech_to_text(uploaded_file)
     st.text_area("Converted Text:", spoken_text)
-text_to_translate = st.text_area("Enter text to translate", spoken_text)
-# Get supported languages
+# UI for manual text input
+st.subheader("📝 Enter Text to Translate")
+text_to_translate = st.text_area("Enter text:", spoken_text)
+# Dropdowns for language selection
 languages = GoogleTranslator().get_supported_languages()
-source_lang = st.selectbox("Enter Source Language", ["auto"] + languages)
-target_lang = st.selectbox("Select Target Language", languages, index=languages.index("english"))
+source_lang = st.selectbox("🔄 Source Language", ["auto"] + languages)
+target_lang = st.selectbox("🎯 Target Language", languages, index=languages.index("english"))
+# Translation button
 if st.button("Translate", type="primary"):
     if text_to_translate.strip():
         translated_text = GoogleTranslator(source=source_lang, target=target_lang).translate(text_to_translate)
-        st.success("Translation:")
+        st.success("✅ Translation:")
         st.write(translated_text)
         if st.button("🔊 Listen to Translation"):
             text_to_speech(translated_text, target_lang)
     else:
-        st.warning("Please enter text or use speech input.")
+        st.warning("⚠️ Please enter text or upload an audio file.")
