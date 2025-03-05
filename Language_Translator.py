@@ -31,10 +31,13 @@ def text_to_speech(text, lang):
 try:
     language_codes = GoogleTranslator().get_supported_languages(as_dict=True)
     language_names = list(language_codes.keys())
+    # Ensure "English" exists, else use the first language
+    default_lang_index = language_names.index("English") if "English" in language_names else 0
 except Exception as e:
     st.error(f"Error loading languages: {e}")
     language_names = ["English", "Hindi", "French", "Spanish"]  # Fallback languages
     language_codes = {"English": "en", "Hindi": "hi", "French": "fr", "Spanish": "es"}
+    default_lang_index = 0  # Default to the first language
 # Speech input button
 if st.button("🎤 Speak"):
     spoken_text = speech_to_text()
@@ -46,7 +49,7 @@ st.subheader("📝 Enter Text to Translate")
 text_to_translate = st.text_area("Enter text:", spoken_text, height=100)
 # Dropdowns for language selection
 source_lang_name = st.selectbox("🔄 Source Language", ["Auto Detect"] + language_names)
-target_lang_name = st.selectbox("🎯 Target Language", language_names, index=language_names.index("English"))
+target_lang_name = st.selectbox("🎯 Target Language", language_names, index=default_lang_index)
 # Convert selected language names to language codes
 source_lang = "auto" if source_lang_name == "Auto Detect" else language_codes.get(source_lang_name, "en")
 target_lang = language_codes.get(target_lang_name, "en")
