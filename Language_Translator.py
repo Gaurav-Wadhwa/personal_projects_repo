@@ -2,7 +2,10 @@ import streamlit as st
 from deep_translator import GoogleTranslator
 import speech_recognition as sr
 from gtts import gTTS
+import sounddevice as sd
+import numpy as np
 import os
+import io
 import ssl
 # Fix SSL certificate issue
 ssl._create_default_https_context = ssl._create_unverified_context
@@ -39,11 +42,10 @@ except Exception as e:
     language_codes = {"English": "en", "Hindi": "hi", "French": "fr", "Spanish": "es"}
     default_lang_index = 0  # Default to the first language
 # Speech input button
+spoken_text = ""
 if st.button("🎤 Speak"):
     spoken_text = speech_to_text()
     st.text_area("Converted Text:", spoken_text, height=100)
-else:
-    spoken_text = ""
 # Manual text input
 st.subheader("📝 Enter Text to Translate")
 text_to_translate = st.text_area("Enter text:", spoken_text, height=100)
