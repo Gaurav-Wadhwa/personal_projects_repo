@@ -1,9 +1,5 @@
 import streamlit as st
 from deep_translator import GoogleTranslator
-import speech_recognition as sr
-from gtts import gTTS
-import tempfile
-import os
 import ssl
 # Fix SSL issues
 ssl._create_default_https_context = ssl._create_unverified_context
@@ -20,29 +16,6 @@ except Exception as e:
     language_names = ["English", "Hindi", "French", "Spanish"]
     language_codes = {"English": "en", "Hindi": "hi", "French": "fr", "Spanish": "es"}
     default_lang_index = 0
-# 🎤 Function to Convert Speech to Text
-def speech_to_text():
-    recognizer = sr.Recognizer()
-    with st.spinner("🎤 Speak now..."):
-        try:
-            with sr.Microphone() as source:
-                recognizer.adjust_for_ambient_noise(source)
-                st.info("Listening...")
-                audio = recognizer.listen(source, timeout=5)
-                text = recognizer.recognize_google(audio)
-                return text
-        except sr.UnknownValueError:
-            return "❌ Could not understand the audio."
-        except sr.RequestError:
-            return "❌ Speech Recognition API error."
-    return ""
-# 🔊 Function to Convert Text to Speech
-def text_to_speech(text, lang):
-    tts = gTTS(text=text, lang=lang, slow=False)
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as temp_audio:
-        temp_audio_path = temp_audio.name
-        tts.save(temp_audio_path)
-        st.audio(temp_audio_path, format="audio/mp3")
 # 📝 Manual Text Input
 text_to_translate = st.text_area("Enter Text to Translate", height=100)
 # 🔄 Language Selection Dropdowns
@@ -59,14 +32,7 @@ if st.button("Translate", type="primary"):
             translated_text = GoogleTranslator(source="auto", target=target_lang).translate(text_to_translate)
             st.success("✅ Translation:")
             st.write(translated_text)
-            if st.button("🔊 Listen to Translation"):
-                text_to_speech(translated_text, target_lang)
         except Exception as e:
             st.error(f"Translation failed: {e}")
     else:
         st.warning("⚠️ Please enter text.")
-# 🎤 Speech-to-Text Button
-if st.button("🎙 Speak"):
-    spoken_text = speech_to_text()
-    if spoken_text:
-        st.text_area("Recognized Text:", spoken_text)
