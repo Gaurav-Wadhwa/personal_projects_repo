@@ -3,4 +3,4 @@ deep-translator
 speechrecognition
 pydub
 gtts
-ffmpeg
+ffmpeg-python
