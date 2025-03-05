@@ -23,13 +23,14 @@ except Exception as e:
 # 🎤 Function to Convert Speech to Text
 def speech_to_text():
     recognizer = sr.Recognizer()
-    with sr.Microphone() as source:
-        st.info("🎤 Speak now...")
+    with st.spinner("🎤 Speak now..."):
         try:
-            recognizer.adjust_for_ambient_noise(source)
-            audio = recognizer.listen(source, timeout=5)
-            text = recognizer.recognize_google(audio)
-            return text
+            with sr.Microphone() as source:
+                recognizer.adjust_for_ambient_noise(source)
+                st.info("Listening...")
+                audio = recognizer.listen(source, timeout=5)
+                text = recognizer.recognize_google(audio)
+                return text
         except sr.UnknownValueError:
             return "❌ Could not understand the audio."
         except sr.RequestError:
@@ -42,12 +43,8 @@ def text_to_speech(text, lang):
         temp_audio_path = temp_audio.name
         tts.save(temp_audio_path)
         st.audio(temp_audio_path, format="audio/mp3")
-# 🎤 Speech Input Button
-if st.button("🎤 Speak"):
-    spoken_text = speech_to_text()
-    st.text_area("Converted Text:", spoken_text, height=100)
 # 📝 Manual Text Input
-text_to_translate = st.text_area("Enter Text to Translate", spoken_text if "spoken_text" in locals() else "", height=100)
+text_to_translate = st.text_area("Enter Text to Translate", height=100)
 # 🔄 Language Selection Dropdowns
 source_lang_name = st.selectbox("🔄 Source Language", ["Auto Detect"] + language_names)
 target_lang_name = st.selectbox("🎯 Target Language", language_names, index=default_lang_index)
@@ -58,7 +55,8 @@ target_lang = language_codes.get(target_lang_name, "en")
 if st.button("Translate", type="primary"):
     if text_to_translate.strip():
         try:
-            translated_text = GoogleTranslator(source=source_lang, target=target_lang).translate(text_to_translate)
+            # ✅ Fix for transliteration: Always use `auto` detection
+            translated_text = GoogleTranslator(source="auto", target=target_lang).translate(text_to_translate)
             st.success("✅ Translation:")
             st.write(translated_text)
             if st.button("🔊 Listen to Translation"):
@@ -67,3 +65,8 @@ if st.button("Translate", type="primary"):
             st.error(f"Translation failed: {e}")
     else:
         st.warning("⚠️ Please enter text.")
+# 🎤 Speech-to-Text Button
+if st.button("🎙 Speak"):
+    spoken_text = speech_to_text()
+    if spoken_text:
+        st.text_area("Recognized Text:", spoken_text)
