@@ -1,4 +1,4 @@
-import streamlit as st
+import streamlit as st 
 from googletrans import Translator, LANGUAGES
 import ssl
 # Fix SSL issues
@@ -45,14 +45,14 @@ target_lang = language_codes[st.session_state.target_lang_name]
 if st.button("Translate", type="primary"):
     if text_to_translate.strip():
         try:
-            # ✅ Translation
+            # ✅ Perfect Translation & Transliteration
             translated = translator.translate(text_to_translate, src=source_lang, dest=target_lang)
             st.success("✅ Translation:")
             st.write(translated.text)  # Proper translation
             
-            # 🔠 Transliteration (if available)
-            transliteration = translated.pronunciation if translated.pronunciation else "N/A"
-            st.info(f"🔠 Transliteration: {transliteration}")
+            # Transliteration (if available)
+            if translated.pronunciation:
+                st.info(f"🔠 Transliteration: {translated.pronunciation}")
         except Exception as e:
             st.error(f"Translation failed: {e}")
     else:
