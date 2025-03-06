@@ -7,7 +7,7 @@ ssl._create_default_https_context = ssl._create_unverified_context
 translator = Translator()
 # Streamlit App Setup
 st.set_page_config(page_title="Language Translator", page_icon="🌎")
-st.write("### 🌎 Language Translator & Transliteration")
+st.write("### 🌎 Language Translator")
 # Get language names and codes
 language_names = list(LANGUAGES.values())
 language_codes = {v: k for k, v in LANGUAGES.items()}  
