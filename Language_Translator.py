@@ -30,11 +30,11 @@ with col3:
 # Handle Swap Button Click
 if swap_pressed:
     if source_lang_name != "Auto Detect":  # Prevent swapping when source is "Auto Detect"
-        st.session_state.source_lang, st.session_state.target_lang = (
-            st.session_state.target_lang, st.session_state.source_lang
-        )
-        st.experimental_rerun()  # Rerun to reflect swap
-# Update session state only when the user manually selects a language
+        temp = st.session_state.source_lang
+        st.session_state.source_lang = st.session_state.target_lang
+        st.session_state.target_lang = temp
+        st.rerun()  # Correct way to refresh the UI in Streamlit
+# Update session state only when user manually selects a language
 if source_lang_name != st.session_state.source_lang:
     st.session_state.source_lang = source_lang_name
 if target_lang_name != st.session_state.target_lang:
@@ -58,3 +58,4 @@ if st.button("Translate", type="primary"):
             st.error(f"Translation failed: {e}")
     else:
         st.warning("⚠️ Please enter text.")
+
