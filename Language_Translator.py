@@ -14,33 +14,33 @@ text_to_translate = st.text_area("Enter Text to Translate", height=100)
 language_names = list(LANGUAGES.values())  # Get language names
 language_codes = {v: k for k, v in LANGUAGES.items()}  # Map names to codes
 # Initialize session state for language selection
-if "source_lang_name" not in st.session_state:
-    st.session_state.source_lang_name = "Auto Detect"
-if "target_lang_name" not in st.session_state:
-    st.session_state.target_lang_name = "english"
+if "source_lang" not in st.session_state:
+    st.session_state.source_lang = "Auto Detect"
+if "target_lang" not in st.session_state:
+    st.session_state.target_lang = "english"
 col1, col2, col3 = st.columns([3, 1, 3])
 with col1:
-    selected_source_lang = st.selectbox("🔄 Source Language", ["Auto Detect"] + language_names, 
-                                        index=(language_names.index(st.session_state.source_lang_name) 
-                                        if st.session_state.source_lang_name in language_names else 0))
+    source_lang_name = st.selectbox("🔄 Source Language", ["Auto Detect"] + language_names, 
+                                    index=(language_names.index(st.session_state.source_lang) 
+                                    if st.session_state.source_lang in language_names else 0))
 with col2:
     swap_pressed = st.button("🔄 Swap")
 with col3:
-    selected_target_lang = st.selectbox("🎯 Target Language", language_names, 
-                                        index=language_names.index(st.session_state.target_lang_name))
+    target_lang_name = st.selectbox("🎯 Target Language", language_names, 
+                                    index=language_names.index(st.session_state.target_lang))
 # Swap functionality
 if swap_pressed:
-    if selected_source_lang != "Auto Detect":  # Prevent swapping when source is "Auto Detect"
-        st.session_state.source_lang_name, st.session_state.target_lang_name = (
-            selected_target_lang, selected_source_lang
+    if source_lang_name != "Auto Detect":  # Prevent swapping when source is "Auto Detect"
+        st.session_state.source_lang, st.session_state.target_lang = (
+            st.session_state.target_lang, st.session_state.source_lang
         )
-        st.experimental_rerun()
-# Ensure dropdowns reflect updated selections
-st.session_state.source_lang_name = selected_source_lang
-st.session_state.target_lang_name = selected_target_lang
+        st.experimental_rerun()  # Rerun the app to reflect the changes
+# Update session state only when the user manually selects a language
+st.session_state.source_lang = source_lang_name
+st.session_state.target_lang = target_lang_name
 # Convert Language Names to Codes
-source_lang = "auto" if st.session_state.source_lang_name == "Auto Detect" else language_codes[st.session_state.source_lang_name]
-target_lang = language_codes[st.session_state.target_lang_name]
+source_lang = "auto" if st.session_state.source_lang == "Auto Detect" else language_codes[st.session_state.source_lang]
+target_lang = language_codes[st.session_state.target_lang]
 # 🔁 Translation & Transliteration
 if st.button("Translate", type="primary"):
     if text_to_translate.strip():
